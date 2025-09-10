@@ -1,0 +1,73 @@
+---
+- name: Gathering the Hardware Information
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Download hwreport.emtpy
+      get_url:
+        url: http://192.168.10.10/hwreport.empty
+        dest: /root/hwreport.txt
+
+    - name: 1) inventory hostname
+      lineinfile:
+        path: /root/hwreport.txt
+        regexp: '^HOST'
+        line: "HOST={{ ansible_facts['hostname'] }}"
+        state: present
+
+    - name: 2) bios version
+      lineinfile:
+        path: /root/hwreport.txt
+        regexp: '^BIOS'
+        line: "BIOS={{ ansible_facts['bios_version'] }}"
+        state: present
+
+    - name: 3) total memory in mb
+      lineinfile:
+        path: /root/hwreport.txt
+        regexp: '^MEMORY'
+        line: "MEMORY={{ ansible_facts['memtotal_mb'] }} MB"
+
+    - name: 4) disk size - /dev/sda
+      lineinfile:
+        path: /root/hwreport.txt
+        regexp: '^SDA_DISK'
+        # (주의) 들여쓰기 하면 안된다. 내어쓰기 한 상태여야 한다.
+        # (주의) replace 모듈을 사용하지 말고 lineinfile 모듈을 사용한다.
+        line: |
+          {% if ansible_facts['devices']['sda'] is defined %}
+          SDA_DISK_SIZE={{ ansible_facts['devices']['sda']['size'] }}
+          {% else %}
+          SDA_DISK_SIZE=NONE
+          {% endif %}
+        state: present
+
+    - name: 5) disk size - /dev/sdb
+      lineinfile:
+        path: /root/hwreport.txt
+        regexp: '^SDB_DISK'
+        line: |
+          {% if ansible_devices.sdb is defined %}
+          SDB_DISK_SIZE={{ ansible_devices.sdb.size }}
+          {% else %}
+          SDB_DISK_SIZE=NONE
+          {% endif %}
+        state: present
+
+    - name: 6) disk size - /dev/sdc
+      lineinfile:
+        path: /root/hwreport.txt
+        regexp: '^SDC_DISK'
+        line: |
+          {% if ansible_facts['devices']['sdc'] is defined %}
+          SDC_DISK_SIZE={{ ansible_facts['devices']['sdc']['size'] }}
+          {% else %}
+          SDC_DISK_SIZE=NONE
+          {% endif %}
+        state: present
+
+    - name: Store file into hwreport directory
+      fetch:
+        src: /root/hwreport.txt
+        dest: hwreport
+

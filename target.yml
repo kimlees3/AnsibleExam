@@ -1,0 +1,12 @@
+---
+- name: change target
+  hosts: all
+  tasks: 
+    - name: change graphical.target
+      ansible.builtin.file:
+        src: /usr/lib/systemd/system/multi-user.target
+        dest: /etc/systemd/system/default.target
+        state: link
+    - name: set-default.target
+      ansible.builtin.command: systemctl isolate multi-user.target
+

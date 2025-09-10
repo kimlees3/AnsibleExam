@@ -1,0 +1,20 @@
+- name: install pkg
+  hosts: dev,test,prod
+  tasks: 
+    - name: install php,mariadb on dev,test,prod
+      ansible.builtin.dnf:
+        name:
+          - php
+          - mariadb
+        state: present
+
+- name: install Development Tools, iotop
+  hosts: dev
+  tasks: 
+    - name: install Development Tools, iotop
+      ansible.builtin.dnf:
+        name:
+          - "@Development Tools"
+          - iotop
+        state: present
+

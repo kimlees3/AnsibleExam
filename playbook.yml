@@ -1,0 +1,14 @@
+--- 
+- name: tasks all playbook
+  hosts: localhost
+  tasks:
+    - ansible.builtin.debug:
+        msg: play all
+- name: play packages
+  ansible.builtin.import_playbook: packages.yml
+- name: play time_sync2.yml
+  ansible.builtin.import_playbook: time_sync2.yml
+- name: play webservers.yml
+  ansible.builtin.import_playbook: webservers.yml
+
+

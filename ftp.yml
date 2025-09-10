@@ -1,0 +1,47 @@
+---
+- name: Configure the FTP Server using vsftpd
+  hosts: test
+  tasks:
+    - name: Install packages - vsftpd, firewalld
+      yum:
+        name: [ vsftpd, ftp, firewalld ]
+        state: latest
+
+    - name: Enable service - vsftpd, firewalld
+      service:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop: [ vsftpd, firewalld ]
+
+    - name: Open the port for vsftpd service
+      firewalld:
+        service: ftp
+        permanent: yes
+        immediate: yes
+        state: enabled
+
+    - name: Check the anonymous enable - /etc/vsftpd/vsftpd.conf
+      lineinfile:
+        path: /etc/vsftpd/vsftpd.conf
+        regexp: '^anonymous_enable'
+        line: 'anonymous_enable=NO'
+      ignore_errors: yes
+      notify: restart vsftpd
+
+    - name: Check root access - /etc/vsftpd/ftpusers
+      lineinfile:
+        path: "{{ item }}"
+        regexp: '^root'
+        line: '#root'
+      ignore_errors: yes
+      loop: [ /etc/vsftpd/ftpusers, /etc/vsftpd/user_list ]
+      notify: restart vsftpd
+
+  handlers:
+    - name: restart vsftpd
+      service:
+        name: vsftpd
+        state: restarted
+
+

@@ -1,0 +1,10 @@
+- name: timesync
+  hosts: all
+  tasks:
+    - name: timesync servers
+      ansible.builtin.include_role:
+        name: fedora.linux_system_roles.timesync
+      vars: 
+        timesync_ntp_servers:
+          - hostname: kr.pool.ntp.org
+            iburst: true
